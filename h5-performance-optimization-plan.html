@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="H5 项目性能优化实施与验收方案" />
+  <title>H5 性能优化方案</title>
+  <style>
+    :root { --ink:#172033; --muted:#667085; --line:#e6eaf0; --bg:#f6f8fb; --blue:#2563eb; --teal:#0f9f83; --amber:#e79217; --red:#dc4d5d; --card:#fff; }
+    * { box-sizing:border-box; } html { scroll-behavior:smooth; } body { margin:0; color:var(--ink); background:var(--bg); font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; }
+    .hero { padding:64px max(24px,calc((100% - 1120px)/2)); color:#fff; background:radial-gradient(circle at 86% 14%,#3d8bff 0,transparent 27%),linear-gradient(125deg,#101b36,#1d3f73); }
+    .eyebrow { color:#96c8ff; font-size:13px; letter-spacing:.12em; text-transform:uppercase; } h1 { margin:8px 0 10px; font-size:40px; line-height:1.2; } .hero p { max-width:720px; margin:0; color:#dbeafe; font-size:17px; }
+    .meta { display:flex; gap:10px; flex-wrap:wrap; margin-top:24px; } .pill { padding:4px 12px; border:1px solid #6aa5ee88; border-radius:99px; font-size:13px; }.hero-cta { display:inline-block; margin-top:24px; padding:11px 18px; border-radius:9px; color:#174991; background:#fff; font-weight:800; text-decoration:none; box-shadow:0 5px 16px #07132955; }
+    main { width:min(1120px,calc(100% - 48px)); margin:30px auto 64px; } nav { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; } nav a { padding:7px 12px; border-radius:8px; background:#eaf1ff; color:#2459b9; text-decoration:none; font-size:13px; }
+    section { scroll-margin-top:16px; margin:20px 0; padding:28px; border:1px solid var(--line); border-radius:16px; background:var(--card); box-shadow:0 4px 14px #243d6410; } h2 { margin:0 0 18px; font-size:23px; } h3 { margin:20px 0 8px; font-size:17px; } p { margin:8px 0; }.lead { color:var(--muted); }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }.grid.two { grid-template-columns:repeat(2,1fr); }.card { padding:18px; border:1px solid var(--line); border-radius:12px; background:#fff; }.card strong { display:block; margin-bottom:5px; font-size:17px; }.tag { display:inline-block; margin-top:8px; padding:2px 8px; border-radius:99px; background:#e8f8f4; color:#087b66; font-size:12px; }
+    table { width:100%; border-collapse:collapse; overflow:hidden; border:1px solid var(--line); border-radius:10px; font-size:14px; } th,td { padding:12px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line); } th { color:#3e4d67; background:#f5f8fc; } tr:last-child td { border-bottom:0; }.good { color:var(--teal); font-weight:700; }.warn { color:#b96b00; font-weight:700; }.bad { color:var(--red); font-weight:700; }
+    .timeline { position:relative; padding-left:26px; border-left:2px solid #b9d4ff; }.step { position:relative; padding:0 0 21px 14px; }.step::before { content:""; position:absolute; width:10px; height:10px; left:-33px; top:7px; border:3px solid #fff; border-radius:50%; background:var(--blue); box-shadow:0 0 0 2px #b9d4ff; }.step:last-child { padding-bottom:0; }.week { color:var(--blue); font-size:13px; font-weight:700; }
+    ul,ol { margin:8px 0; padding-left:22px; } li { margin:5px 0; } code { padding:1px 5px; border-radius:4px; color:#a03b19; background:#fff2eb; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.9em; }.callout { padding:16px 18px; border-left:4px solid var(--blue); border-radius:0 8px 8px 0; color:#27446d; background:#eff6ff; }.formula { margin:12px 0; padding:13px 16px; border-radius:8px; color:#17448d; background:#f4f8ff; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+    .check { list-style:none; padding-left:0; }.check li { padding-left:27px; position:relative; }.check li::before { content:"□"; position:absolute; left:0; color:var(--blue); font-size:19px; line-height:1.4; } footer { color:var(--muted); text-align:center; font-size:13px; }
+    .guide { margin:18px 0 24px; overflow:hidden; border:1px solid #ccd5e2; border-radius:12px; background:#fff; box-shadow:0 5px 16px #20385c15; }.chrome { display:flex; align-items:center; height:34px; padding:0 12px; gap:6px; background:#e8edf3; }.dot { width:10px; height:10px; border-radius:50%; background:#ff6257; }.dot:nth-child(2){background:#ffbd2e}.dot:nth-child(3){background:#28c940}.address { flex:1; margin-left:8px; padding:3px 11px; border-radius:5px; color:#748092; background:#fff; font-size:11px; }.browser { min-height:270px; background:linear-gradient(90deg,#fff 0 58%,#f7f8fa 58%); }.page { display:inline-block; width:58%; min-height:270px; padding:28px 18px; vertical-align:top; }.fake-title { width:63%; height:20px; border-radius:4px; background:#233b63; }.fake-copy { width:84%; height:8px; margin-top:13px; border-radius:3px; background:#e4e8ee; }.fake-copy.short { width:52%; }.fake-banner { height:90px; margin-top:22px; border-radius:8px; background:linear-gradient(120deg,#d4e3ff,#8bb7ff); }.panel { display:inline-block; width:42%; min-height:270px; padding:12px; border-left:1px solid #ccd5e2; vertical-align:top; color:#334155; font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; }.tabs { display:flex; gap:9px; padding-bottom:8px; border-bottom:1px solid #dfe4ea; font:11px -apple-system,BlinkMacSystemFont,sans-serif; }.tabs b { padding-bottom:7px; color:#1f61d0; border-bottom:2px solid #1f61d0; }.num { display:inline-grid; width:20px; height:20px; place-items:center; margin-right:5px; border-radius:50%; color:#fff; background:#e65d35; font:700 12px -apple-system,BlinkMacSystemFont,sans-serif; }.panel-line { margin:8px 0; padding:5px; border-radius:4px; background:#edf1f5; }.panel-line.hot { color:#9f3415; background:#fff0e8; }.water { display:flex; height:155px; align-items:flex-end; gap:5px; padding:12px 4px 2px; border-bottom:1px solid #aeb9c8; }.bar { width:13%; border-radius:3px 3px 0 0; background:#70a6fa; }.bar.orange{background:#f5a15c}.bar.red{background:#e86565}.caption { padding:10px 14px; color:#5c6b80; background:#fbfcfd; font-size:13px; }.legend { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:14px 0; }.legend div { padding:8px; border-radius:7px; background:#f6f8fb; font-size:13px; }.legend .num { float:left; }.tip { margin:12px 0; padding:12px 15px; border:1px solid #f3dfb3; border-radius:8px; color:#754c08; background:#fffaed; font-size:14px; }.beginner-step { display:grid; grid-template-columns:42px 1fr; gap:13px; padding:15px 0; border-bottom:1px dashed #dce3ed; }.beginner-step:last-child { border:0; }.step-no { display:grid; place-items:center; width:36px; height:36px; border-radius:11px; color:#fff; background:var(--blue); font-size:18px; font-weight:800; }.beginner-step h4 { margin:0; font-size:16px; }.beginner-step p { margin:3px 0; color:#536277; }.action { display:inline-block; padding:1px 7px; border:1px solid #cddbf4; border-radius:4px; color:#1d56b6; background:#edf4ff; font-size:13px; }.badges { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }.badges span { padding:3px 8px; border-radius:5px; background:#f3f5f8; color:#526074; font-size:12px; }.diagnosis { padding:22px; border:1px solid #bcd1fb; border-radius:14px; background:linear-gradient(135deg,#f1f6ff,#fff); }.fields { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }.field { padding:13px; border:1px solid #dbe4f0; border-radius:9px; background:#fff; }.field label { display:block; font-weight:800; }.field small { display:block; min-height:22px; color:#65738a; }.field input { width:100%; margin-top:7px; padding:8px 10px; border:1px solid #b9c8db; border-radius:6px; font:16px inherit; }.result { display:none; margin-top:16px; padding:15px 17px; border-radius:9px; }.result.show { display:block; }.result.good { color:#086750; background:#e9faf4; }.result.warn { color:#8b5504; background:#fff5df; }.result.bad { color:#9f2639; background:#fff0f1; }.primary { margin-top:14px; padding:10px 15px; border:0; border-radius:8px; color:#fff; background:var(--blue); font:700 15px inherit; cursor:pointer; }.micro { margin:9px 0 0; color:#64748b; font-size:12px; }
+    @media (max-width:720px) { .hero { padding:46px 24px; } h1 { font-size:31px; }.grid,.grid.two,.fields { grid-template-columns:1fr; } section { padding:21px 17px; } main { width:min(100% - 28px,1120px); } table { display:block; overflow-x:auto; white-space:nowrap; } }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="eyebrow">Mobile Web Performance Playbook</div>
+    <h1>H5 项目性能优化方案</h1>
+    <p>目标：让关键页面在真实移动网络和中低端设备上更快可见、更快可交互，并用可重复的指标证明优化效果。</p>
+    <div class="meta"><span class="pill">适用：活动页 / 商城 / 表单 / 内容 H5</span><span class="pill">周期：4 周首轮治理</span><span class="pill">原则：数据驱动，优先关键路径</span></div><a class="hero-cta" href="#quick-check">开始第一次性能检测 ↓</a>
+  </header>
+  <main>
+    <nav><a href="#quick-check">开始检测</a><a href="#goal">目标</a><a href="#metrics">指标</a><a href="#where">在哪里看</a><a href="#read">图文教程</a><a href="#plan">实施方案</a><a href="#verify">验证验收</a><a href="#monitor">监控机制</a></nav>
+    <section id="quick-check">
+      <h2>开始检测：填入结果，获得下一步建议</h2>
+      <p class="lead">先按下方教程运行一次 Lighthouse，把报告顶部的 3 个数填进来。只填你已看到的指标即可。</p>
+      <div class="diagnosis"><div class="fields"><div class="field"><label for="lcp">LCP（秒）</label><small>例如报告显示 3.4 s，填 3.4</small><input id="lcp" type="number" min="0" step="0.1" placeholder="例如 3.4"></div><div class="field"><label for="inp">INP / TBT（毫秒）</label><small>线上填 INP；Lighthouse 常显示 TBT</small><input id="inp" type="number" min="0" step="1" placeholder="例如 320"></div><div class="field"><label for="cls">CLS</label><small>例如报告显示 0.12，填 0.12</small><input id="cls" type="number" min="0" step="0.01" placeholder="例如 0.12"></div></div><button class="primary" id="diagnose" type="button">查看我的下一步</button><p class="micro">这是快速排查建议，不替代真实用户监控；优化完成后仍需复测。</p><div id="result" class="result" aria-live="polite"></div></div>
+    </section>
+
+    <section id="goal">
+      <h2>1. 本轮目标与优先级</h2>
+      <p class="lead">先聚焦访问量最高或转化最关键的 3–5 个页面（例如首页、活动落地页、下单/报名页）。以移动端 4G、常见中端 Android 机型为主要验收环境。</p>
+      <div class="grid">
+        <div class="card"><strong>首屏更快出现</strong>减少阻塞资源、压缩首屏素材，缩短用户等待。<span class="tag">加载体验</span></div>
+        <div class="card"><strong>操作立刻响应</strong>降低主线程长任务与脚本体积，避免点按卡顿。<span class="tag">交互体验</span></div>
+        <div class="card"><strong>布局稳定可靠</strong>预留媒体尺寸、控制异步内容，避免页面跳动。<span class="tag">视觉体验</span></div>
+      </div>
+      <div class="callout" style="margin-top:18px"><b>执行规则：</b>每项改动必须关联一个性能问题、一个预期指标和一次前后对比；优先处理能同时改善 LCP、流量消耗和转化漏斗的事项。</div>
+    </section>
+
+    <section id="metrics">
+      <h2>2. 指标体系与验收线</h2>
+      <p class="lead">实验室数据用于定位与回归，真实用户数据（RUM）用于判断实际体验。核心指标以 P75（75 分位）为主要决策口径。</p>
+      <table>
+        <thead><tr><th>维度</th><th>指标</th><th>目标（P75）</th><th>含义 / 观察方式</th></tr></thead>
+        <tbody>
+          <tr><td>加载</td><td><b>LCP</b></td><td class="good">≤ 2.5 s</td><td>最大内容完成渲染；首屏主图、标题或主视觉通常影响它。</td></tr>
+          <tr><td>交互</td><td><b>INP</b></td><td class="good">≤ 200 ms</td><td>用户点击、输入后的响应延迟；替代旧的 FID 作为核心指标。</td></tr>
+          <tr><td>稳定</td><td><b>CLS</b></td><td class="good">≤ 0.10</td><td>页面视觉位移；广告、图片、字体和异步模块是常见来源。</td></tr>
+          <tr><td>体验诊断</td><td>FCP / TTFB</td><td>≤ 1.8 s / ≤ 0.8 s</td><td>首次内容出现 / 服务端响应；用于拆分前后端瓶颈。</td></tr>
+          <tr><td>资源</td><td>首屏 JS / 图片 / 请求数</td><td class="warn">按基线降低 30%+</td><td>建议首屏压缩后 JS ≤ 200 KB、图片 ≤ 300 KB（视业务视觉复杂度调整）。</td></tr>
+          <tr><td>业务</td><td>关键转化率、错误率</td><td class="good">转化不降，错误率不升</td><td>性能优化必须同时守住报名、下单、提交等业务结果。</td></tr>
+        </tbody>
+      </table>
+      <p class="formula">P75 = 75% 的真实访问会话优于该值；按页面、设备档位、网络类型、版本分别查看。</p>
+    </section>
+
+    <section id="where">
+      <h2>3. 指标在哪里看：工具与入口</h2>
+      <p class="lead">建议同时使用两类工具：<b>本地 / 预发诊断工具</b>负责找原因，<b>线上 RUM 监控</b>负责判断真实用户是否受益。只看 Lighthouse 分数不能代表线上体验。</p>
+      <table>
+        <thead><tr><th>场景</th><th>推荐工具</th><th>从哪里进入</th><th>最适合看什么</th></tr></thead>
+        <tbody>
+          <tr><td>开发时定位问题</td><td>Chrome DevTools</td><td>打开页面 → 按 <code>F12</code>（Mac：<code>⌘⌥I</code>）</td><td>Network 看资源瀑布；Performance 看主线程、长任务和布局偏移。</td></tr>
+          <tr><td>一次性体检与对比</td><td>Lighthouse</td><td>DevTools → <b>Lighthouse</b> → 勾选 Performance / Mobile → Analyze page load</td><td>LCP、CLS、INP/TBT、机会项与未使用代码；适合 PR 前后对比。</td></tr>
+          <tr><td>公开 URL 的外部检测</td><td>PageSpeed Insights</td><td>访问 <code>pagespeed.web.dev</code> → 输入线上 URL → Analyze</td><td>实验室报告 + Chrome 真实用户体验数据（若该 URL 数据量足够）。</td></tr>
+          <tr><td>线上真实用户</td><td>RUM 平台</td><td>接入 Sentry、阿里云 ARMS、腾讯云 RUM、Datadog 等任一平台的 Web SDK</td><td>按 URL、版本、机型、网络切分后的 P75；发布后的趋势与告警。</td></tr>
+          <tr><td>接口与资源问题</td><td>Network / APM</td><td>DevTools → <b>Network</b>；或服务端 APM 的接口面板</td><td>TTFB、接口总耗时、CDN 缓存命中、失败率和慢接口。</td></tr>
+        </tbody>
+      </table>
+      <div class="callout" style="margin-top:18px"><b>推荐组合：</b>开发人员用 DevTools + Lighthouse；测试在真实手机弱网复测；产品 / 运营在 RUM 看板看 P75 趋势和业务转化。若项目未接入 RUM，先完成第 5 节的 Web Vitals 上报，才有长期可用的线上数据。</div>
+    </section>
+
+    <section id="read">
+      <h2>4. 怎么看：逐项操作与判读</h2>
+      <h3>第一次检测：照着做，约 10 分钟</h3>
+      <p class="lead">以下以 Chrome 桌面浏览器为例。即使你的项目最终运行在微信里，也先用这个流程找问题；之后再用手机微信复测核心流程。</p>
+      <div class="card">
+        <div class="beginner-step"><div class="step-no">1</div><div><h4>准备一个要检测的页面</h4><p>打开项目的首页或最重要的活动页。建议先用线上测试环境 URL；没有测试环境就用线上页面，但不要提交表单或下单。</p><div class="badges"><span>不要先登录</span><span>关闭广告拦截等插件</span><span>用无痕窗口更接近首次访问</span></div></div></div>
+        <div class="beginner-step"><div class="step-no">2</div><div><h4>打开开发者工具</h4><p>Windows：按 <code>F12</code> 或 <code>Ctrl + Shift + I</code>；Mac：按 <code>⌘ + ⌥ + I</code>。浏览器右侧或下方出现一块有 Elements、Console 等英文标签的面板，即表示成功。</p></div></div>
+        <div class="beginner-step"><div class="step-no">3</div><div><h4>先跑 Lighthouse，得到“体检单”</h4><p>在面板顶部找到 <span class="action">Lighthouse</span>。如果看不到，点击最右侧的 <b>»</b> 展开更多标签。选择 <span class="action">Mobile</span> 和 <span class="action">Performance</span>，然后点 <span class="action">Analyze page load</span>。</p></div></div>
+        <div class="beginner-step"><div class="step-no">4</div><div><h4>保存第一次结果</h4><p>等待约 30–60 秒。记录报告顶部的 LCP、CLS、TBT/INP、FCP，以及底部显示的资源建议。连续检测 3 次，取中间那次，不要只记录最好或最差的一次。</p></div></div>
+        <div class="beginner-step"><div class="step-no">5</div><div><h4>进入对应面板找原因</h4><p><b>LCP 慢</b>去 Network；<b>点按卡</b>去 Performance；<b>页面跳</b>也去 Performance 的 Experience。下面每一节会说明具体点哪里。</p></div></div>
+      </div>
+      <h3>4.1 用 Lighthouse 做一次标准检测</h3>
+      <div class="guide" role="img" aria-label="Chrome DevTools 中 Lighthouse 选项卡和性能报告的示意图">
+        <div class="chrome"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="address">https://你的-h5-页面.example</span></div><div class="browser"><div class="page"><div class="fake-title"></div><div class="fake-copy"></div><div class="fake-copy short"></div><div class="fake-banner"></div></div><div class="panel"><div class="tabs">Elements　Console　Network　Performance　<b>Lighthouse</b></div><p><span class="num">1</span>选择 <b>Mobile</b></p><p><span class="num">2</span>勾选 <b>Performance</b></p><div class="panel-line hot"><span class="num">3</span>Analyze page load</div><div class="panel-line">Performance　82</div><div class="panel-line">LCP　2.8 s　　CLS　0.04</div></div></div><div class="caption">图 1：打开开发者工具后，选择 Lighthouse，按 1 → 2 → 3 操作即可生成报告。</div>
+      </div>
+      <ol>
+        <li>用 Chrome 无痕窗口打开目标页面，关闭会改变页面内容的插件；首次检测使用未登录、清空缓存的状态。</li>
+        <li>按 <code>F12</code> 打开 DevTools，选择 <b>Lighthouse</b>；Device 选 <b>Mobile</b>，Categories 至少勾选 <b>Performance</b>。</li>
+        <li>点击 <b>Analyze page load</b>，连续跑 3 次，记录中位数，避免单次网络抖动造成误判。</li>
+        <li>在报告顶部记下 LCP、INP（有时显示为 TBT 作为实验室交互代理）、CLS、FCP、Speed Index；在下方 Opportunities / Diagnostics 展开具体建议。</li>
+      </ol>
+      <h3>Lighthouse 报告中每一项怎么读</h3>
+      <table><thead><tr><th>报告里看到的字</th><th>先看哪个数</th><th>新手判断</th><th>下一步操作</th></tr></thead><tbody><tr><td>Largest Contentful Paint</td><td><span class="good">≤ 2.5 s</span>；2.5–4 s 偏慢；<span class="bad">&gt; 4 s</span> 很慢</td><td>首屏最大的图/文字出现得太晚。</td><td>点击这一项展开，找到 <b>Largest Contentful Paint element</b>；记住元素名称，再去 Network 搜图片或接口。</td></tr><tr><td>Cumulative Layout Shift</td><td><span class="good">≤ 0.10</span>；0.10–0.25 偏高；<span class="bad">&gt; 0.25</span> 很差</td><td>加载时内容上下跳动。</td><td>展开 <b>Avoid large layout shifts</b>，看列出的图片/模块；检查是否缺少宽高或异步插入内容。</td></tr><tr><td>Total Blocking Time</td><td><span class="good">≤ 200 ms</span>；<span class="bad">&gt; 600 ms</span> 应优先处理</td><td>电脑模拟中 JS 阻塞主线程的总量；它帮助预测交互卡顿。</td><td>展开 <b>Reduce JavaScript execution time</b> 和 <b>Minimize main-thread work</b>，再去 Performance 看具体函数。</td></tr><tr><td>Opportunities</td><td>Potential savings（可节省时间/体积）</td><td>这是可优化清单，不是报错。</td><td>优先做节省时间最多的前 3 项，例如图片编码、未使用 JS、阻塞 CSS。</td></tr></tbody></table>
+      <table>
+        <thead><tr><th>看到的现象</th><th>通常说明什么</th><th>下一步去哪看</th></tr></thead>
+        <tbody>
+          <tr><td>LCP 偏高</td><td>首屏最大元素（常为 banner 图、标题或主卡片）出现晚。</td><td>报告的 <b>Largest Contentful Paint element</b> 找元素；在 Network 看它何时请求、是否过大、是否被 JS 或 CSS 阻塞。</td></tr>
+          <tr><td>CLS 偏高</td><td>加载过程有元素移动，用户容易误点。</td><td>报告的 <b>Avoid large layout shifts</b> 看责任元素；Performance 录制后打开 Experience 轨道查看 Shift 事件。</td></tr>
+          <tr><td>TBT 高 / INP 差</td><td>主线程被长时间 JavaScript 任务占用，点击不能及时处理。</td><td>Performance 录制，找主线程中带红色标记、超过 50 ms 的任务，展开 Call Tree 找函数或第三方脚本。</td></tr>
+          <tr><td>TTFB 偏高</td><td>请求到收到第一个字节过慢，常与服务端、接口、CDN 或重定向有关。</td><td>Network 点开 HTML / API 请求 → Timing，比较 DNS、连接、Waiting (TTFB)、Content Download。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>4.2 用 Network 判断资源是否拖慢首屏</h3>
+      <div class="guide" role="img" aria-label="Chrome Network 面板瀑布图的示意图">
+        <div class="chrome"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="address">https://你的-h5-页面.example</span></div><div class="browser"><div class="page"><div class="fake-title"></div><div class="fake-copy"></div><div class="fake-banner"></div></div><div class="panel"><div class="tabs">Elements　Console　<b>Network</b>　Performance</div><p><span class="num">1</span>勾选 Disable cache</p><p><span class="num">2</span>选择 Slow 4G 后刷新</p><div class="water"><i class="bar" style="height:38%"></i><i class="bar orange" style="height:69%"></i><i class="bar" style="height:42%"></i><i class="bar red" style="height:96%"></i><i class="bar" style="height:34%"></i></div><p><span class="num">3</span>红色最长条 = 优先排查的慢资源</p></div></div><div class="caption">图 2：Network 的瀑布图中，越晚结束、越大的资源越值得优先处理；点开它再看 Timing。</div>
+      </div>
+      <ol>
+        <li>DevTools → <b>Network</b>，勾选 <b>Disable cache</b>（仅在 DevTools 开启时生效），点击刷新；选择 <b>Fast 4G</b> 或 <b>Slow 4G</b> 模拟网络。</li>
+        <li>按 <b>Waterfall</b> 排序，重点看页面开始后最晚完成、体积最大的 JS、CSS、图片和接口；点开单项看 <b>Headers</b> 与 <b>Timing</b>。</li>
+        <li>判断关键资源：首屏可见前必须完成的 HTML、关键 CSS、主图、首屏接口属于关键路径；聊天、统计、推荐、非首屏图片不应阻塞它。</li>
+      </ol>
+      <h3>点开一个慢资源后，Timing 里的数字怎么理解</h3>
+      <table><thead><tr><th>Timing 阶段</th><th>大致正常</th><th>慢了该找谁</th><th>常见处理方式</th></tr></thead><tbody><tr><td>DNS Lookup / Initial connection</td><td>首次请求少量耗时，后续应复用连接</td><td>域名、CDN、跨域连接</td><td>减少域名数量；给关键第三方域名加 <code>preconnect</code>。</td></tr><tr><td>Waiting (TTFB)</td><td>尽量 ≤ 800 ms</td><td>后端 / 接口 / CDN</td><td>查服务端耗时、接口串行调用、缓存命中和重定向。</td></tr><tr><td>Content Download</td><td>资源越大越久</td><td>前端资源</td><td>压缩图片、用 WebP/AVIF、代码拆包、Brotli 压缩。</td></tr></tbody></table>
+      <div class="grid two"><div class="card"><strong>资源诊断信号</strong><ul><li>图片体积大：看 <b>Size</b> 与 <b>Dimensions</b>，是否下载了远大于展示尺寸的图片。</li><li>请求晚：Initiator 显示由脚本触发，说明可考虑预加载、下沉或避免串行依赖。</li><li>TTFB 长：Timing 的 Waiting 很长，优先查接口、CDN 与服务端。</li><li>重复下载：看是否缺少缓存响应头或资源 URL 没有 hash。</li></ul></div><div class="card"><strong>常用筛选方式</strong><ul><li>输入 <code>Img</code>：聚焦图片；输入 <code>JS</code>：聚焦脚本。</li><li>输入域名：查第三方 SDK、埋点、广告或地图请求。</li><li>点 Size 列：找最大的传输资源。</li><li>查看底部汇总：请求数、传输量、Finish / DOMContentLoaded 时间。</li></ul></div></div>
+
+      <h3>4.3 用 Performance 定位卡顿、INP 与 CLS</h3>
+      <div class="guide" role="img" aria-label="Chrome Performance 主线程长任务与布局偏移的示意图">
+        <div class="chrome"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="address">https://你的-h5-页面.example</span></div><div class="browser"><div class="page"><div class="fake-title"></div><div class="fake-copy"></div><div class="fake-banner"></div></div><div class="panel"><div class="tabs">Elements　Console　Network　<b>Performance</b></div><p><span class="num">1</span>点击圆点录制，再刷新 / 操作</p><div class="panel-line">Timings　　▲ LCP</div><div class="panel-line hot"><span class="num">2</span>Main：████████　长任务 &gt; 50 ms</div><div class="panel-line"><span class="num">3</span>Experience：Layout Shift</div><p>点击色块 → Bottom-up 找耗时函数</p></div></div><div class="caption">图 3：黄色/红色长条通常表示脚本占住主线程；点击它，再在 Bottom-up 中查看最耗时的函数或第三方脚本。</div>
+      </div>
+      <div class="tip"><b>新手先记住这一条：</b>页面慢时，先用 Lighthouse 知道“慢在哪里”；再用 Network 查“哪个资源慢”；操作卡时，用 Performance 查“哪段 JavaScript 占住了页面”。</div>
+      <ol>
+        <li>DevTools → <b>Performance</b>，点击录制按钮；刷新页面，待首屏完成后停止。检测操作卡顿时，录制期间完成一次点击、滑动或输入。</li>
+        <li>先看顶部 <b>Timings</b> 中的 LCP 标记；再看 <b>Main</b>（主线程）是否存在连续密集的黄色脚本块。</li>
+        <li>红色小三角或长条通常代表 Long Task；点击后在 Bottom-up / Call Tree 看耗时函数。超过 <b>50 ms</b> 的任务优先拆分。</li>
+        <li>展开 <b>Experience</b> 轨道中的 Layout Shift，点击事件后可查看发生偏移的节点和分数；为这些元素预留尺寸或避免插入到已渲染内容上方。</li>
+      </ol>
+      <div class="callout"><b>INP 的读法：</b>它衡量一次用户操作直到下一帧可呈现的完整延迟。线上以 P75 ≤ 200 ms 为目标；本地分析时，先从点击/输入附近最长的主线程任务开始，而不是只盯一个总分。</div>
+
+      <h3>4.4 真实用户数据（RUM）应这样看</h3>
+      <p>SDK 接入后，不要只看全站平均值。平均值会掩盖弱网和低端机问题，重点使用 <b>P75</b>，并对比同一页面、相近流量条件下的发布前后数据。</p>
+      <div class="grid two"><div class="card"><strong>每日看板顺序</strong><ol><li>全站与重点 URL 的 LCP / INP / CLS P75 趋势。</li><li>按 <b>release/version</b> 对比，确认新版本是否恶化。</li><li>按 4G、Wi‑Fi、低端 Android / iOS 分组，寻找长尾用户。</li><li>关联错误率、接口失败率、跳出与转化，确认业务影响。</li></ol></div><div class="card"><strong>正确的对比方式</strong><ul><li>同一 URL 对比，而不是把首页和详情页混在一起。</li><li>至少观察 7 天或取得足够会话量后再下结论。</li><li>排除大促、投放渠道突变等流量结构变化。</li><li>发布采用 5% → 25% → 100% 灰度，每一档看 P75 与错误率。</li></ul></div></div>
+      <p class="formula">示例：/campaign 页面 4G Android 的 LCP P75 从 3.8 s 降至 2.5 s，改善 = (3.8 - 2.5) / 3.8 = 34.2%。同时确认提交转化率与错误率没有恶化。</p>
+      <h3>每次检测请填这张记录表</h3>
+      <p class="lead">把它复制到飞书、Notion 或 Excel。优化前、优化后各填一行，团队才能确认改动是否有效。</p>
+      <table><thead><tr><th>日期 / 页面</th><th>环境</th><th>LCP</th><th>CLS</th><th>TBT / INP</th><th>发现的问题</th><th>下一步</th></tr></thead><tbody><tr><td>____ / ______</td><td>Chrome 无痕<br>Mobile + Fast 4G</td><td>____ s</td><td>____</td><td>____ ms</td><td>例如：banner 图片 1.2 MB，TTFB 1.4 s</td><td>转 WebP；排查接口缓存</td></tr><tr><td>____ / ______</td><td>真机 + 4G / 微信</td><td>____ s</td><td>____</td><td>____ ms</td><td>例如：点击提交按钮延迟</td><td>录制 Performance，找长任务</td></tr></tbody></table>
+    </section>
+
+    <section id="plan">
+      <h2>5. 四周实施方案</h2>
+      <div class="timeline">
+        <div class="step"><div class="week">第 1 周｜测量与归因</div><b>建立基线，找出最大问题。</b><ul><li>接入 Web Vitals RUM：采集 LCP、INP、CLS、TTFB、页面版本、网络类型、设备信息与关键错误。</li><li>对重点页面跑 Lighthouse（移动模拟）和 Chrome Performance 录制；同时在真机 4G 网络下复测。</li><li>输出问题清单：最大资源、阻塞脚本、长任务、慢接口、布局偏移元素，按“影响 × 覆盖用户数 × 改造成本”排序。</li></ul></div>
+        <div class="step"><div class="week">第 2 周｜首屏与资源瘦身</div><b>先把首屏链路缩短。</b><ul><li>图片：主图使用 AVIF/WebP，按容器提供响应式尺寸；首屏主图 <code>fetchpriority="high"</code>，非首屏 <code>loading="lazy"</code>；删除无效大图。</li><li>JS/CSS：路由与组件按需加载；拆出第三方 SDK；移除未使用依赖；压缩并启用 Brotli/Gzip；非关键脚本加 <code>defer</code>。</li><li>网络：静态资源走 CDN、强缓存（带 hash 文件名）；<code>preconnect</code> 到关键域名；避免首屏瀑布式请求。</li><li>服务端：接口并发聚合、首屏接口优先；开启 HTTP/2 或 HTTP/3；缓存可复用的配置和内容。</li></ul></div>
+        <div class="step"><div class="week">第 3 周｜主线程与交互治理</div><b>消除点击后“假死”。</b><ul><li>在 Performance 面板定位超过 50 ms 的 Long Task；拆分大计算，使用 <code>requestIdleCallback</code>、Web Worker 或分片处理。</li><li>避免滚动/输入事件高频重排：使用节流、被动事件监听，批量读写 DOM，动画优先 <code>transform</code>/<code>opacity</code>。</li><li>按需初始化埋点、客服、地图、分享等第三方 SDK；设置加载超时和失败降级。</li><li>对列表使用虚拟滚动或分页，减少初次 DOM 数量；控制复杂组件重复渲染。</li></ul></div>
+        <div class="step"><div class="week">第 4 周｜稳定性、回归与灰度</div><b>确保优化可持续。</b><ul><li>为图片、视频、广告位、异步卡片显式声明宽高或 <code>aspect-ratio</code>；字体设置 <code>font-display: swap</code>。</li><li>在 CI 中加入 Lighthouse 性能预算；超过预算阻断或告警。</li><li>按 5% → 25% → 100% 灰度发布，对比优化前后 P75 指标、错误率与转化率；异常立即回滚。</li></ul></div>
+      </div>
+    </section>
+
+    <section id="verify">
+      <h2>6. 如何验证：从本地到真实用户</h2>
+      <div class="grid two">
+        <div class="card"><strong>A. 实验室验证（每次 PR）</strong><ol><li>使用无痕窗口、清空缓存，选择移动设备模拟与 Fast 4G / Slow 4G 各跑 3 次。</li><li>记录中位数：LCP、CLS、总传输量、请求数、主线程长任务。</li><li>用 Performance / Network 确认：LCP 元素变小或更早加载、阻塞资源减少、接口耗时下降。</li><li>用 Lighthouse CI 对关键 URL 做性能预算回归。</li></ol></div>
+        <div class="card"><strong>B. 真实用户验证（发布后 7–14 天）</strong><ol><li>通过 <code>web-vitals</code> 或 RUM SDK 上报核心指标及页面维度。</li><li>按网络（Wi‑Fi/4G/3G）、设备性能、地域、页面版本分组查看 P75。</li><li>与发布前同周期对比，避免只看平均值；检查异常页面和长尾用户。</li><li>同时核对 JS 错误率、接口失败率、跳出率和关键转化漏斗。</li></ol></div>
+      </div>
+      <h3>建议的验收表</h3>
+      <table><thead><tr><th>验收项</th><th>通过条件</th><th>证据</th></tr></thead><tbody><tr><td>性能</td><td>LCP、INP、CLS 达到目标或相对基线改善 ≥ 30%</td><td>Lighthouse 报告 + RUM P75 仪表盘</td></tr><tr><td>兼容性</td><td>主流 iOS/Android 机型、微信/系统浏览器核心路径通过</td><td>真机测试记录</td></tr><tr><td>稳定性</td><td>JS 错误率、接口失败率不高于优化前</td><td>错误监控与接口监控</td></tr><tr><td>业务</td><td>关键转化率无显著下降</td><td>灰度 A/B 或前后同期对比</td></tr></tbody></table>
+    </section>
+
+    <section id="monitor">
+      <h2>7. 监控看板与告警</h2>
+      <p class="lead">建议每日看趋势、每周复盘分组数据；异常判断基于连续趋势而非单点波动。</p>
+      <div class="grid two"><div class="card"><strong>看板必备维度</strong><ul><li>页面 URL / 页面版本 / 发布批次</li><li>网络类型、地区、浏览器、系统</li><li>设备档位（可按内存、CPU 核心数或自定义机型分层）</li><li>新老用户、关键业务漏斗阶段</li></ul></div><div class="card"><strong>建议告警规则</strong><ul><li>任一重点页面 LCP P75 连续 1 小时高于 3 s</li><li>INP P75 连续 1 小时高于 300 ms</li><li>CLS P75 高于 0.15 或 JS 错误率环比翻倍</li><li>发布后转化率显著下降，自动关联版本并暂停扩大灰度</li></ul></div></div>
+    </section>
+
+    <section id="checklist">
+      <h2>8. 上线前检查清单</h2>
+      <ul class="check"><li>首屏 LCP 图片已压缩、指定尺寸，并且不被懒加载。</li><li>非关键 JS 已延迟加载；第三方脚本可失败降级。</li><li>静态资源启用 CDN、压缩和版本化缓存策略。</li><li>图片、卡片、广告和动态模块均预留布局空间。</li><li>重点页面已完成移动模拟、真机、弱网三类测试。</li><li>RUM 已携带页面版本，性能指标可按版本回溯。</li><li>性能预算已加入 CI；灰度、监控与回滚方案已就绪。</li></ul>
+    </section>
+    <footer>H5 性能优化方案 · 建议每月根据真实用户数据更新优先级与性能预算</footer>
+  </main>
+  <script>
+    (() => {
+      const get = id => Number.parseFloat(document.getElementById(id).value);
+      const result = document.getElementById('result');
+      document.getElementById('diagnose').addEventListener('click', () => {
+        const lcp = get('lcp'), inp = get('inp'), cls = get('cls');
+        const tips = [], issues = [];
+        if (Number.isNaN(lcp) && Number.isNaN(inp) && Number.isNaN(cls)) {
+          result.className = 'result show warn';
+          result.textContent = '请先至少填入一个指标。Lighthouse 报告顶部即可找到 LCP、CLS 与 TBT。';
+          return;
+        }
+        if (!Number.isNaN(lcp) && lcp > 2.5) { issues.push(`LCP ${lcp}s 偏慢`); tips.push('打开 Network → 勾选 Disable cache → 刷新。先找首屏最大图片、CSS、首屏接口中最晚完成或体积最大的资源。'); }
+        if (!Number.isNaN(inp) && inp > 200) { issues.push(`交互指标 ${inp}ms 偏高`); tips.push('打开 Performance 录制一次点击或输入；在 Main 中优先处理超过 50ms 的长任务和第三方脚本。'); }
+        if (!Number.isNaN(cls) && cls > .1) { issues.push(`CLS ${cls} 偏高`); tips.push('在 Performance 的 Experience 轨道点开 Layout Shift；给对应图片、广告位、异步卡片设置明确的宽高或 aspect-ratio。'); }
+        if (!tips.length) {
+          result.className = 'result show good';
+          result.innerHTML = '<b>这组实验室指标达标。</b> 下一步：换 Slow 4G 再测一次，并在真机 / 微信里完成关键操作，随后接入 RUM 观察真实用户 P75。';
+        } else {
+          result.className = 'result show ' + (issues.length >= 2 ? 'bad' : 'warn');
+          result.innerHTML = `<b>优先问题：${issues.join('；')}。</b><br>建议按此顺序处理：<ol>${tips.map(t => `<li>${t}</li>`).join('')}</ol>`;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
